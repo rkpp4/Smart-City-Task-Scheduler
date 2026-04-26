@@ -255,18 +255,36 @@ const setupDefaultData = async () => {
 
 const seedData = async () => {
   if ((await Issue.countDocuments()) === 0) {
+    const defaultUser = await User.findOne({
+      email: "citizen@test.com",
+    });
+
+    if (!defaultUser) return;
+
     await Issue.insertMany([
       {
         title: "Street Light Not Working",
+        description: "Street light near main road not working",
+        category: "Electricity",
+        location: "Main Road Area",
         status: "Submitted",
+        createdBy: defaultUser._id,
       },
       {
         title: "Garbage Not Collected",
+        description: "Garbage not collected for 3 days",
+        category: "Sanitation",
+        location: "Market Area",
         status: "Submitted",
+        createdBy: defaultUser._id,
       },
       {
         title: "Water Leakage Near Road",
+        description: "Pipeline leakage near junction",
+        category: "Water Supply",
+        location: "Temple Street",
         status: "Submitted",
+        createdBy: defaultUser._id,
       },
     ]);
 
