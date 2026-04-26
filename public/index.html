@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart City Civic Platform</title>
+    <link rel="stylesheet" href="index.css" />
+    <!-- Use Plus Jakarta Sans for premium, modern look -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <!-- Auth Section -->
+    <div id="auth-section" class="auth-container">
+      <div class="auth-card glass-panel">
+        <h2><i class="fas fa-cube"></i> City Task Scheduler</h2>
+        <p class="subtitle">Secure login for Citizens & Monitors</p>
+        <div class="tabs">
+          <button id="tab-login" class="active">Sign In</button>
+          <button id="tab-register">Create Account</button>
+        </div>
+
+        <form id="login-form">
+          <div class="form-group">
+            <label>Email Address</label>
+            <input
+              type="email"
+              id="login-email"
+              required
+              placeholder="monitor@test.com"
+            />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input
+              type="password"
+              id="login-password"
+              required
+              placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+            />
+          </div>
+          <button type="submit" class="btn primary hover-glow">
+            Access Dashboard <i class="fas fa-arrow-right"></i>
+          </button>
+        </form>
+
+        <form id="register-form" style="display: none">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input
+              type="text"
+              id="reg-name"
+              required
+              placeholder="Alice Citizen"
+            />
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input
+              type="email"
+              id="reg-email"
+              required
+              placeholder="alice@example.com"
+            />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="reg-password" required />
+          </div>
+          <div class="form-group">
+            <label>Access Role</label>
+            <select id="reg-role">
+              <option value="citizen">Citizen Account</option>
+              <option value="monitor">Admin / Monitor</option>
+            </select>
+          </div>
+          <button type="submit" class="btn primary hover-glow">
+            Register Account <i class="fas fa-user-plus"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Main App Layout -->
+    <div id="app-layout" class="app-layout hidden">
+      <aside class="sidebar glass-panel">
+        <div class="sidebar-header">
+          <h2><i class="fas fa-cube"></i> City Task Scheduler</h2>
+          <span id="user-role-badge" class="badge role-badge">Role</span>
+        </div>
+        <ul id="sidebar-nav" class="nav-list">
+          <!-- Injected via JS based on role -->
+        </ul>
+        <div class="sidebar-footer">
+          <div class="profile-info">
+            <div class="avatar"><i class="fas fa-user"></i></div>
+            <div id="user-profile">User</div>
+          </div>
+          <button id="logout-btn" class="btn outline hover-glow">
+            <i class="fas fa-sign-out-alt"></i> Sign Out
+          </button>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <header class="top-header">
+          <h1 id="page-title">Command Center</h1>
+        </header>
+
+        <div id="view-container" class="view-container">
+          <!-- Analytics Dashboard View -->
+          <div id="view-dashboard" class="view hidden">
+            <div class="analytics-grid" id="analytics-cards">
+              <!-- Cards injected via JS -->
+            </div>
+          </div>
+
+          <!-- Citizen Submit Form View -->
+          <div id="view-submit-issue" class="view hidden">
+            <div class="card glass-panel">
+              <h3><i class="fas fa-plus-circle"></i> File a New Report</h3>
+              <form id="form-submit-issue" class="two-column-form">
+                <div class="form-group">
+                  <label>Report Title</label
+                  ><input
+                    type="text"
+                    id="issue-title"
+                    required
+                    placeholder="e.g. Broken Water Pipe"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>Category</label>
+                  <select id="issue-category">
+                    <option value="Road">Road & Infrastructure</option>
+                    <option value="Sanitation">Sanitation & Waste</option>
+                    <option value="Water">Water Supply</option>
+                    <option value="Electricity">Electricity & Lighting</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Exact Location</label
+                  ><input
+                    type="text"
+                    id="issue-location"
+                    required
+                    placeholder="123 Main St"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>Priority Level</label>
+                  <select id="issue-priority">
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                    <option value="Emergency">Emergency</option>
+                  </select>
+                </div>
+                <div class="form-group full-width">
+                  <label>Evidence / Photo Upload (Optional)</label>
+                  <input
+                    type="file"
+                    id="issue-photo-upload"
+                    accept="image/*"
+                    class="file-uploader"
+                  />
+                  <div class="preview-box">
+                    <img id="issue-photo-preview" style="display: none" />
+                  </div>
+                </div>
+                <div class="form-group full-width">
+                  <label>Detailed Description</label>
+                  <textarea
+                    id="issue-description"
+                    rows="4"
+                    required
+                    placeholder="Describe the issue..."
+                  ></textarea>
+                </div>
+                <div class="form-actions full-width right-align">
+                  <button type="submit" class="btn primary hover-glow">
+                    Submit Report <i class="fas fa-paper-plane"></i>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Citizen My Issues View -->
+          <div id="view-my-issues" class="view hidden">
+            <div class="helpline-banner glass-panel">
+              <div class="helpline-icon"><i class="fas fa-headset"></i></div>
+              <div class="helpline-text">
+                <strong>Escalation Helpline</strong>
+                <p>
+                  If the problem you have posted is ignored for
+                  <b>more than 3 days</b>, or if it is an emergency and the
+                  problem is not escalated quickly, please contact our direct
+                  hotline immediately:
+                  <b class="phone-number"> CIVIC-HELP (+91 9876543210 )</b>
+                </p>
+              </div>
+            </div>
+
+            <div class="card glass-panel table-card">
+              <h3><i class="fas fa-folder-open"></i> Tracking My Reports</h3>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Report Details</th>
+                    <th>Category</th>
+                    <th>Location</th>
+                    <th>Priority</th>
+                    <th>Status Tracker</th>
+                  </tr>
+                </thead>
+                <tbody id="my-issues-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Monitor All Issues View -->
+          <div id="view-all-issues" class="view hidden">
+            <div class="card glass-panel table-card">
+              <h3>
+                <i class="fas fa-satellite-dish"></i> Civic Control Center
+              </h3>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Overview</th>
+                    <th>Reporter</th>
+                    <th>Category</th>
+                    <th>Location</th>
+                    <th>Priority</th>
+                    <th>Current Status</th>
+                    <th>Admin Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="all-issues-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Monitor Update Status Modal -->
+    <div id="modal-update-status" class="modal hidden">
+      <div class="modal-content glass-panel">
+        <div class="modal-header">
+          <h3>Update Issue Progress</h3>
+          <button class="close-modal" data-target="modal-update-status">
+            &times;
+          </button>
+        </div>
+        <form id="form-update-status">
+          <input type="hidden" id="update-issue-id" />
+          <div class="form-group">
+            <label>Status</label>
+            <select id="update-status-select" required>
+              <option value="Approved">Approved / Ready</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Resolved">Resolved</option>
+              <option value="Closed">Closed</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+          </div>
+          <div
+            class="form-group"
+            id="update-worker-container"
+            style="display: none"
+          >
+            <label>Assign Indian Worker</label>
+            <select id="update-worker-select">
+              <option value="">-- Select Worker --</option>
+              <!-- Injected via JS -->
+            </select>
+          </div>
+          <div
+            class="form-group"
+            id="update-photo-container"
+            style="display: none"
+          >
+            <label>Attach Resolution Evidence (Image)</label>
+            <input
+              type="file"
+              id="resolution-photo-upload"
+              accept="image/*"
+              class="file-uploader"
+            />
+          </div>
+          <div class="form-group">
+            <label>Add Workflow Remark</label>
+            <input
+              type="text"
+              id="update-remark"
+              placeholder="e.g. Dispatched Water Dept..."
+            />
+          </div>
+          <button type="submit" class="btn primary hover-glow full-width">
+            Apply Changes
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Photo Viewing Modal -->
+    <div id="modal-view-photo" class="modal hidden">
+      <div class="modal-content glass-panel photo-panel">
+        <div class="modal-header">
+          <h3>Attached Evidence</h3>
+          <button class="close-modal" data-target="modal-view-photo">
+            &times;
+          </button>
+        </div>
+        <div class="img-container">
+          <img id="modal-photo-img" />
+        </div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
