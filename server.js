@@ -166,6 +166,19 @@ const setupDefaultData = async () => {
     }
 }
 
+const { MongoMemoryServer } = require("mongodb-memory-server");
+const mongoose = require("mongoose");
+
+async function connectDB() {
+  const mongod = await MongoMemoryServer.create();
+  const uri = mongod.getUri();
+
+  await mongoose.connect(uri);
+  console.log("In-memory MongoDB connected");
+}
+
+connectDB();
+
 // Start Server
 let serverStarted = false;
 const startServer = async () => {
@@ -188,3 +201,4 @@ module.exports = { startServer, app };
 if (require.main === module) {
   startServer();
 }
+
