@@ -1,5 +1,8 @@
 let currentUser = null;
-const apiBase = 'http://localhost:3000';
+const apiBase =
+  window.location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "https://smart-city-task-scheduler.onrender.com";
 
 const WORKERS = [
     { name: "Rahul Sharma", phone: "+91 98765 43210" },
