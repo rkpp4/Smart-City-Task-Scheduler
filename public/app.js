@@ -1,8 +1,9 @@
 let currentUser = null;
-const apiBase = "http://localhost:3000";
 
-let currentPhotoBase64 = null;
-let currentResolutionBase64 = null;
+const apiBase =
+  window.location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "https://smart-city-task-scheduler.onrender.com";
 
 const WORKERS = [
   { name: "Rahul Sharma", phone: "+91 98765 43210" },
@@ -11,6 +12,11 @@ const WORKERS = [
   { name: "Sai Reddy", phone: "+91 65432 10987" },
   { name: "Vikram Singh", phone: "+91 54321 09876" },
 ];
+
+let currentPhotoBase64 = null;
+let currentResolutionBase64 = null;
+
+/* ================= INIT ================= */
 
 document.addEventListener("DOMContentLoaded", () => {
   document
@@ -45,14 +51,26 @@ document.addEventListener("DOMContentLoaded", () => {
     .getElementById("form-submit-issue")
     .addEventListener("submit", handleCitizenSubmit);
 
-  const token = localStorage.getItem("token");
-  const user = localStorage.getItem("user");
+  document.querySelectorAll(".close-modal").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const target = e.target.getAttribute("data-target");
 
-  if (token && user) {
-    currentUser = JSON.parse(user);
+      if (target) document.getElementById(target).classList.add("hidden");
+    });
+  });
+
+  const token = localStorage.getItem("token");
+
+  const userStr = localStorage.getItem("user");
+
+  if (token && userStr) {
+    currentUser = JSON.parse(userStr);
+
     loadApp();
   }
 });
+
+/* ================= AUTH ================= */
 
 function showAuthTab(e, formId) {
   document
@@ -75,31 +93,30 @@ async function handleLogin(e) {
 
   const password = document.getElementById("login-password").value;
 
-  try {
-    const res = await fetch(`${apiBase}/login`, {
-      method: "POST",
+  const res = await fetch(`${apiBase}/login`, {
+    method: "POST",
 
-      headers: {
-        "Content-Type": "application/json",
-      },
+    headers: {
+      "Content-Type": "application/json",
+    },
 
-      body: JSON.stringify({ email, password }),
-    });
+    body: JSON.stringify({
+      email,
+      password,
+    }),
+  });
 
-    const data = await res.json();
+  const data = await res.json();
 
-    if (!data.token) return alert(data.error);
+  if (!data.token) return alert(data.error);
 
-    localStorage.setItem("token", data.token);
+  localStorage.setItem("token", data.token);
 
-    localStorage.setItem("user", JSON.stringify(data.user));
+  localStorage.setItem("user", JSON.stringify(data.user));
 
-    currentUser = data.user;
+  currentUser = data.user;
 
-    loadApp();
-  } catch (err) {
-    alert("Login failed");
-  }
+  loadApp();
 }
 
 async function handleRegister(e) {
@@ -129,7 +146,7 @@ async function handleRegister(e) {
 
   if (data.error) alert(data.error);
   else {
-    alert("Registered successfully");
+    alert("Registration successful");
 
     document.getElementById("tab-login").click();
   }
@@ -149,6 +166,8 @@ function authHeaders() {
   };
 }
 
+/* ================= APP LOAD ================= */
+
 function loadApp() {
   document.getElementById("auth-section").classList.add("hidden");
 
@@ -163,6 +182,8 @@ function loadApp() {
 
   loadDashboardStats();
 }
+
+/* ================= SIDEBAR ================= */
 
 function buildSidebar() {
   const nav = document.getElementById("sidebar-nav");
@@ -200,9 +221,15 @@ function buildSidebar() {
 
     const li = document.createElement("li");
 
-    li.textContent = link.label;
+    li.innerHTML = link.label;
 
     li.onclick = () => {
+      document
+        .querySelectorAll("#sidebar-nav li")
+        .forEach((el) => el.classList.remove("active"));
+
+      li.classList.add("active");
+
       hideAllViews();
 
       document.getElementById("page-title").textContent = link.label;
@@ -214,16 +241,22 @@ function buildSidebar() {
   });
 }
 
+/* ================= VIEW SWITCH ================= */
+
 function hideAllViews() {
-  document.querySelectorAll(".view").forEach((v) => v.classList.add("hidden"));
+  document
+    .querySelectorAll(".view-container .view")
+    .forEach((v) => v.classList.add("hidden"));
 }
+
+/* ================= PHOTO HANDLING ================= */
 
 function handlePhotoUpload(e) {
   const file = e.target.files[0];
 
   const reader = new FileReader();
 
-  reader.onload = (event) => (currentPhotoBase64 = event.target.result);
+  reader.onload = (ev) => (currentPhotoBase64 = ev.target.result);
 
   reader.readAsDataURL(file);
 }
@@ -233,12 +266,16 @@ function handleResolutionUpload(e) {
 
   const reader = new FileReader();
 
-  reader.onload = (event) => (currentResolutionBase64 = event.target.result);
+  reader.onload = (ev) => (currentResolutionBase64 = ev.target.result);
 
   reader.readAsDataURL(file);
 }
 
+/* ================= ISSUE SUBMISSION ================= */
+
 function loadSubmitIssue() {
+  hideAllViews();
+
   document.getElementById("view-submit-issue").classList.remove("hidden");
 }
 
@@ -246,175 +283,24 @@ async function handleCitizenSubmit(e) {
   e.preventDefault();
 
   const body = {
-    title: document.getElementById("issue-title").value,
+    title: issue - title.value,
 
-    category: document.getElementById("issue-category").value,
+    category: issue - category.value,
 
-    location: document.getElementById("issue-location").value,
+    location: issue - location.value,
 
-    priority: document.getElementById("issue-priority").value,
+    priority: issue - priority.value,
 
-    description: document.getElementById("issue-description").value,
+    description: issue - description.value,
 
     photo: currentPhotoBase64,
   };
 
-  const res = await fetch(`${apiBase}/issues`, {
+  await fetch(`${apiBase}/issues`, {
     method: "POST",
-
     headers: authHeaders(),
-
     body: JSON.stringify(body),
   });
 
-  if (!res.ok) return alert("Submit failed");
-
-  currentPhotoBase64 = null;
-
   loadMyIssues();
-}
-
-async function loadMyIssues() {
-  document.getElementById("view-my-issues").classList.remove("hidden");
-
-  const res = await fetch(`${apiBase}/my-issues`, {
-    headers: authHeaders(),
-  });
-
-  const issues = await res.json();
-
-  const tbody = document.getElementById("my-issues-tbody");
-
-  tbody.innerHTML = "";
-
-  issues.forEach((i) => {
-    tbody.innerHTML += `
-
-<tr>
-
-<td>${i.title}</td>
-
-<td>${i.category}</td>
-
-<td>${i.location}</td>
-
-<td>${i.status}</td>
-
-<td>
-
-${
-  i.resolutionPhoto
-    ? `<button onclick="viewPhoto('${i.resolutionPhoto}')">Resolution</button>`
-    : ""
-}
-
-</td>
-
-</tr>
-
-`;
-  });
-}
-
-async function loadAllIssues() {
-  document.getElementById("view-all-issues").classList.remove("hidden");
-
-  const res = await fetch(`${apiBase}/issues`, {
-    headers: authHeaders(),
-  });
-
-  const issues = await res.json();
-
-  const tbody = document.getElementById("all-issues-tbody");
-
-  tbody.innerHTML = "";
-
-  issues.forEach((i) => {
-    tbody.innerHTML += `
-
-<tr>
-
-<td>${i.title}</td>
-
-<td>${i.category}</td>
-
-<td>${i.location}</td>
-
-<td>${i.status}</td>
-
-<td>
-
-<button onclick="openStatusModal('${i._id}')">
-
-Update
-
-</button>
-
-</td>
-
-</tr>
-
-`;
-  });
-}
-
-function openStatusModal(id) {
-  document.getElementById("update-issue-id").value = id;
-
-  document.getElementById("modal-update-status").classList.remove("hidden");
-}
-
-async function handleUpdateStatus(e) {
-  e.preventDefault();
-
-  const issueId = document.getElementById("update-issue-id").value;
-
-  const status = document.getElementById("update-status-select").value;
-
-  const payload = { status };
-
-  if (status === "Resolved") payload.resolutionPhoto = currentResolutionBase64;
-
-  await fetch(
-    `${apiBase}/issues/status/${issueId}`,
-
-    {
-      method: "PUT",
-
-      headers: authHeaders(),
-
-      body: JSON.stringify(payload),
-    },
-  );
-
-  currentResolutionBase64 = null;
-
-  loadAllIssues();
-
-  loadMyIssues();
-
-  loadDashboardStats();
-}
-
-function viewPhoto(base64) {
-  document.getElementById("modal-photo-img").src = base64;
-
-  document.getElementById("modal-view-photo").classList.remove("hidden");
-}
-
-async function loadDashboardStats() {
-  hideAllViews();
-
-  document.getElementById("view-dashboard").classList.remove("hidden");
-
-  const res = await fetch(`${apiBase}/dashboard/stats`, {
-    headers: authHeaders(),
-  });
-
-  const stats = await res.json();
-
-  document.getElementById("analytics-cards").innerHTML = Object.entries(stats)
-    .map(([k, v]) => `<div>${k}: ${v}</div>`)
-
-    .join("");
 }
