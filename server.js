@@ -181,6 +181,79 @@ app.get("/issues", authenticate, authorize(["monitor"]), async (req, res) => {
 });
 
 /* ===============================
+   UPDATE ISSUE STATUS (NEW FIX)
+=============================== */
+
+app.put(
+  "/issues/status/:id",
+  authenticate,
+  authorize(["monitor"]),
+  async (req, res) => {
+    try {
+      const issue = await Issue.findByIdAndUpdate(
+        req.params.id,
+        {
+          status: req.body.status,
+          assignedWorkerName: req.body.assignedWorkerName,
+          assignedWorkerPhone: req.body.assignedWorkerPhone,
+          resolutionPhoto: req.body.resolutionPhoto,
+        },
+        { new: true },
+      );
+
+      if (!issue)
+        return res.status(404).json({
+          error: "Issue not found",
+        });
+
+      res.json({
+        message: "Issue status updated successfully",
+        issue,
+      });
+    } catch (err) {
+      res.status(500).json({
+        error: err.message,
+      });
+    }
+  },
+);
+
+/* ===============================
+   ADD MONITOR REMARKS (NEW FIX)
+=============================== */
+
+app.put(
+  "/issues/remarks/:id",
+  authenticate,
+  authorize(["monitor"]),
+  async (req, res) => {
+    try {
+      const issue = await Issue.findById(req.params.id);
+
+      if (!issue)
+        return res.status(404).json({
+          error: "Issue not found",
+        });
+
+      issue.remarks.push({
+        text: req.body.remark,
+        addedBy: req.user.id,
+      });
+
+      await issue.save();
+
+      res.json({
+        message: "Remark added successfully",
+      });
+    } catch (err) {
+      res.status(500).json({
+        error: err.message,
+      });
+    }
+  },
+);
+
+/* ===============================
    DASHBOARD STATS
 =============================== */
 
@@ -199,8 +272,6 @@ app.get("/dashboard/stats", authenticate, async (req, res) => {
 
       approved: issues.filter((i) => i.status === "Approved").length,
 
-      assigned: issues.filter((i) => i.status === "Assigned").length,
-
       inProgress: issues.filter((i) => i.status === "In Progress").length,
 
       resolved: issues.filter((i) => i.status === "Resolved").length,
@@ -217,7 +288,7 @@ app.get("/dashboard/stats", authenticate, async (req, res) => {
 });
 
 /* ===============================
-   HEALTH CHECK ENDPOINT
+   HEALTH CHECK
 =============================== */
 
 app.get("/health", (req, res) => {
@@ -270,22 +341,6 @@ const seedData = async () => {
         status: "Submitted",
         createdBy: defaultUser._id,
       },
-      {
-        title: "Garbage Not Collected",
-        description: "Garbage not collected for 3 days",
-        category: "Sanitation",
-        location: "Market Area",
-        status: "Submitted",
-        createdBy: defaultUser._id,
-      },
-      {
-        title: "Water Leakage Near Road",
-        description: "Pipeline leakage near junction",
-        category: "Water Supply",
-        location: "Temple Street",
-        status: "Submitted",
-        createdBy: defaultUser._id,
-      },
     ]);
 
     console.log("Sample issues inserted");
@@ -314,16 +369,15 @@ const startServer = async () => {
   await seedData();
 
   app.listen(PORT, () => {
-    console.log(
-      `Smart City Task Scheduler running on http://localhost:${PORT}`,
-    );
+    console.log(`Server running at http://localhost:${PORT}`);
   });
 
   serverStarted = true;
 };
 
-module.exports = { startServer, app };
+module.exports = {
+  startServer,
+  app,
+};
 
-if (require.main === module) {
-  startServer();
-}
+if (require.main === module) startServer();
