@@ -331,6 +331,9 @@ async function loadAllIssues() {
       const photoBtn = i.photo
         ? `<button onclick="viewPhoto('${i.photo}')" class="btn-sm btn-photo"><i class="fas fa-image"></i> Photo</button>`
         : "";
+      const resBtn = i.resolutionPhoto
+        ? `<button onclick="viewPhoto('${i.resolutionPhoto}')" class="btn-sm btn-photo" style="background:#10b981"><i class="fas fa-check-circle"></i> Resolved</button>`
+        : "";
 
       let actions = "";
 
@@ -338,7 +341,7 @@ async function loadAllIssues() {
       actions += `<button onclick="openStatusModal('${i._id}', '${i.status}')" class="btn-sm btn-action hover-glow"><i class="fas fa-edit"></i> Update</button>`;
 
       tbody.innerHTML += `<tr>
-                <td><b>${i.title}</b><br>${photoBtn}</td>
+                <td><b>${i.title}</b><br>${photoBtn} ${resBtn}</td>
                 <td>${citizenName}</td>
                 <td>${i.category}</td>
                 <td>${i.location}</td>
