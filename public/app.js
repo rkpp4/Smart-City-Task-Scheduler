@@ -1,5 +1,5 @@
 let currentUser = null;
-const apiBase = "http://localhost:3000";
+const apiBase = "";
 
 const WORKERS = [
   { name: "Rahul Sharma", phone: "+91 98765 43210" },
